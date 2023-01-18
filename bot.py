@@ -10,8 +10,7 @@ import mysql.connector
 from yandexfreetranslate import YandexFreeTranslate
 yt = YandexFreeTranslate()
 
-
-
+# mysql соед...
 mydb = mysql.connector.connect(
   host="localhost",
   user="bot_user",
