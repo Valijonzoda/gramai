@@ -116,8 +116,8 @@ async def get_text_messages(msg: types.Message):
        user_id = msg.from_user.id
        whate = "⌛ Пожалуйста, подождите "
        await bot.send_message(msg.from_user.id, whate)
-       openai.api_key = "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"
-       model_engine = "text-davinci-003"
+       openai.api_key = "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"
+       model_engine = "text-davinci-003" #"text-davinci-003"
 
        mycursor = mydb.cursor()
        query = "SELECT q_lang, a_lang FROM language WHERE user_telegram_id = %s ORDER BY id DESC LIMIT 1"
@@ -141,7 +141,7 @@ async def get_text_messages(msg: types.Message):
        completion = openai.Completion.create(
            engine=model_engine,
            prompt=prompt,
-           max_tokens=1024,
+           max_tokens=250,
            temperature=0.5,
            top_p=1,
            frequency_penalty=0,
