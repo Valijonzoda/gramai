@@ -32,7 +32,6 @@ async def process_start_command(message: types.Message):
 
     await message.reply("Чтобы выбрать языки, на которм будете задавать вопросы и хотите получать ответы, введите /lang\nПо умолчанию, можно задавать вопросы на русском и английких языках.")
 
-
 @dp.message_handler(commands=['lang'])
 async def ask_first_question(message):
     global user_id 
@@ -106,14 +105,17 @@ async def process_help_command(message: types.Message):
 
 @dp.message_handler(content_types=['text'])
 async def get_text_messages(msg: types.Message):
+   if msg.from_user.first_name == "Olya_07" or msg.from_user.first_name == "Jonibek" or msg.from_user.first_name =="Gladius"  or msg.from_user.first_name =="А.К." or msg.from_user.first_name =="A" or msg.from_user.first_name =="ismoilov" or msg.from_user.first_name =="FIRDAVS":
+       await msg.answer('У вас закончились токены, попробуйте завтра')
 
-
-   if msg.text.lower() == 'привет':
+   elif msg.text.lower() == 'пидораз' or msg.text.lower() == "пидараз" or msg.text.lower()=="пидараз":
+       await msg.answer('Сам такой!')
+   elif msg.text.lower() == 'привет' or msg.text.lower() == "салом" or msg.text.lower()=="Как дела":
        await msg.answer('Привет!')
-
-
    else:
        user_id = msg.from_user.id
+
+
        whate = "⌛ Пожалуйста, подождите "
        await bot.send_message(msg.from_user.id, whate)
        openai.api_key = "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"
@@ -136,12 +138,14 @@ async def get_text_messages(msg: types.Message):
        else:
            prompt=msg.text
 
+       if len(prompt) > 200:
+           await msg.answer('слишком длинный вопрос!')
 
        # генерируем ответ
        completion = openai.Completion.create(
            engine=model_engine,
            prompt=prompt,
-           max_tokens=250,
+           max_tokens=590,
            temperature=0.5,
            top_p=1,
            frequency_penalty=0,
