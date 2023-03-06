@@ -5,7 +5,7 @@ from aiogram.utils import executor
 import openai
 from config import TOKEN
 import mysql.connector
-
+import random
 #доб  библиотеку переводчика
 from yandexfreetranslate import YandexFreeTranslate
 yt = YandexFreeTranslate()
@@ -126,7 +126,8 @@ async def get_text_messages(msg: types.Message):
 
        whate = "⌛ Пожалуйста, подождите "
        sent_message = await bot.send_message(msg.from_user.id, whate)
-       openai.api_key = "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"
+       openai_api_keys = ["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", "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", "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", "SP40YsBn4gYprGndso80T3BlbkFJ91E1q3lInHdhVd7hEEih", "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"]
+       openai.api_key = random.choice(openai_api_keys)
        model_engine = "text-davinci-003" #"text-davinci-003"
 
        mycursor = mydb.cursor()
