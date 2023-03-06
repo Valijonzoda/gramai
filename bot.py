@@ -9,13 +9,14 @@ import mysql.connector
 #доб  библиотеку переводчика
 from yandexfreetranslate import YandexFreeTranslate
 yt = YandexFreeTranslate()
+yt = YandexFreeTranslate(api = "ios")
 
 # mysql соед...
 mydb = mysql.connector.connect(
   host="localhost",
-  user="bot_user",
-  password="123",
-  database="bot"
+  user="admin",
+  password="firdavs2001",
+  database="bot_data"
 )
 # openai.api_key = "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"
 
@@ -40,12 +41,12 @@ async def ask_first_question(message):
     button1 = InlineKeyboardButton("Тоҷикӣ", callback_data="tg")
     button2 = InlineKeyboardButton("Русский", callback_data="ru")
     button3 = InlineKeyboardButton("English", callback_data="en")
-    button4 = InlineKeyboardButton("O'zbek", callback_data="uz")
-    keyboard.add(button1, button2, button3, button4)
+
+    keyboard.add(button1, button2, button3)
 
     await bot.send_message(message.chat.id, "Выберите язык, на котором хотите задать свой вопрос:", reply_markup=keyboard)
 
-@dp.callback_query_handler(lambda c: c.data in ["tg", "ru", "en", "uz"])
+@dp.callback_query_handler(lambda c: c.data in ["tg", "ru", "en"])
 async def process_first_answer(callback_query):
     global first_answer
     first_answer = callback_query.data
@@ -57,11 +58,10 @@ async def ask_second_question(message):
     button1 = InlineKeyboardButton("Русский ", callback_data="ru_q")
     button2 = InlineKeyboardButton("Тоҷикӣ", callback_data="tg_q")
     button3 = InlineKeyboardButton("English", callback_data="en_q")
-    button4 = InlineKeyboardButton("O`zbek", callback_data="uz_q")
-    keyboard.add(button1, button2, button3, button4)
-    await bot.send_message(message.chat.id, "На коком языке хотите получить ответ:", reply_markup=keyboard)
+    keyboard.add(button1, button2, button3)
+    await bot.send_message(message.chat.id, "На каком языке хотите получить ответ:", reply_markup=keyboard)
 
-@dp.callback_query_handler(lambda c: c.data in ["tg_q", "ru_q", "en_q", "uz_q"])
+@dp.callback_query_handler(lambda c: c.data in ["tg_q", "ru_q", "en_q"])
 async def process_second_answer(callback_query):
     global second_answer
     second_answer = callback_query.data
@@ -72,25 +72,33 @@ async def process_second_answer(callback_query):
         second_answer = "ru"
     elif second_answer == "en_q":
         second_answer = "en"
-    elif second_answer == "uz_q":
-        second_answer = "uz"
-    # if second_answer == "tg":
-    #     second_answer = "tj"
     mycursor = mydb.cursor()
-    sql = "INSERT INTO language(user_telegram_id, q_lang, a_lang) VALUES (%s, %s, %s)"
+    sql = "INSERT INTO language2(user_telegram_id, q_lang, a_lang) VALUES (%s, %s, %s)"
     val = (user_id, first_answer, second_answer)
     mycursor.execute(sql, val)
     mydb.commit()
-    query = "SELECT q_lang, a_lang FROM language WHERE user_telegram_id = %s ORDER BY id DESC LIMIT 1"
+    query = "SELECT q_lang, a_lang FROM language2 WHERE user_telegram_id = %s ORDER BY id DESC LIMIT 1"
     mycursor.execute(query, (user_id,))
     results = mycursor.fetchall()
     q_lang = (results[0][0])
     a_lang = (results[0][1])
 
 
-
-
-    await bot.send_message(callback_query.message.chat.id, f"Вопрос на языке: {q_lang}\n Ответ на языке:{a_lang}")
+    if q_lang == "tg":
+    	lang = "Тоҷикӣ"
+    elif q_lang == "en":
+    	lang = "Engish"
+    else : 
+    	lang = "Русский"
+    
+    if a_lang == "tg":
+    	alang = "Тоҷикӣ"
+    elif a_lang == "en":
+    	alang = "Engish"
+    else : 
+    	alang = "Русский"
+    
+    await bot.send_message(callback_query.message.chat.id, f"Вопрос на языке: {lang}\n Ответ на языке:{alang}")
 
 
 
@@ -105,26 +113,25 @@ async def process_help_command(message: types.Message):
 
 @dp.message_handler(content_types=['text'])
 async def get_text_messages(msg: types.Message):
-   if msg.from_user.first_name == "Olya_07" or msg.from_user.first_name == "Jonibek" or msg.from_user.first_name =="Gladius"  or msg.from_user.first_name =="А.К." or msg.from_user.first_name =="A" or msg.from_user.first_name =="ismoilov" or msg.from_user.first_name =="FIRDAVS":
+   if msg.from_user.first_name == "O":
        await msg.answer('У вас закончились токены, попробуйте завтра')
 
    elif msg.text.lower() == 'пидораз' or msg.text.lower() == "пидараз" or msg.text.lower()=="пидараз":
        await msg.answer('Сам такой!')
-   elif msg.text.lower() == 'привет' or msg.text.lower() == "салом" or msg.text.lower()=="Как дела":
+   elif msg.text.lower() == 'привет' or msg.text.lower() == "салом":
        await msg.answer('Привет!')
    else:
        user_id = msg.from_user.id
 
 
        whate = "⌛ Пожалуйста, подождите "
-       await bot.send_message(msg.from_user.id, whate)
+       sent_message = await bot.send_message(msg.from_user.id, whate)
        openai.api_key = "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"
        model_engine = "text-davinci-003" #"text-davinci-003"
 
        mycursor = mydb.cursor()
-       query = "SELECT q_lang, a_lang FROM language WHERE user_telegram_id = %s ORDER BY id DESC LIMIT 1"
+       query = "SELECT q_lang, a_lang FROM language2 WHERE user_telegram_id = %s ORDER BY id DESC LIMIT 1"
        user_id = msg.from_user.id
-
        mycursor.execute(query, (user_id,))
        results = mycursor.fetchall()
        if len(results) == 0:
@@ -153,7 +160,7 @@ async def get_text_messages(msg: types.Message):
        )
        #бот выдает ответ
        # print(second_answer)
-       query = "SELECT q_lang, a_lang FROM language WHERE user_telegram_id = %s ORDER BY id DESC LIMIT 1"
+       query = "SELECT q_lang, a_lang FROM language2 WHERE user_telegram_id = %s ORDER BY id DESC LIMIT 1"
        mycursor.execute(query, (user_id,))
        results = mycursor.fetchall()
 
@@ -164,17 +171,19 @@ async def get_text_messages(msg: types.Message):
        from datetime import datetime
        current_dateTime = datetime.now()
        print(user_id, "язык ответа:", a_lang,"| дата: ",current_dateTime.year,".",current_dateTime.month,".",current_dateTime.day, current_dateTime.hour,":",current_dateTime.minute)
-       if a_lang in ["tg", "uz", "en"]:
+       if a_lang in ["tg","en"]:
            text_ot = yt.translate("ru", a_lang, completion.choices[0].text)
+           await bot.delete_message(chat_id=sent_message.chat.id, message_id=sent_message.message_id)
            await bot.send_message(msg.from_user.id, text_ot)
        else:
+           await bot.delete_message(chat_id=sent_message.chat.id, message_id=sent_message.message_id)
            await bot.send_message(msg.from_user.id, completion.choices[0].text)
 
 
 
        #print(completion.choices[0].text)
        mycursor = mydb.cursor()
-       sql = "INSERT INTO bots_data (user_first_name, user_last_name, username, question, answer) VALUES (%s, %s, %s, %s, %s)"
+       sql = "INSERT INTO bot_history2 (user_first_name, user_last_name, username, question, answer) VALUES (%s, %s, %s, %s, %s)"
        val = (msg.from_user.first_name, msg.from_user.last_name, msg.from_user.username, msg.text, completion.choices[0].text)
        mycursor.execute(sql, val)
        mydb.commit()
@@ -182,4 +191,3 @@ async def get_text_messages(msg: types.Message):
 if __name__ == '__main__':
     executor.start_polling(dp)
 
-#await bot.send_message(msg.from_user.id, msg.text )
